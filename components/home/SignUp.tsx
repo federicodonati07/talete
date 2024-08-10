@@ -1,4 +1,5 @@
-"use client";
+// SignUpPage.tsx
+"use client"
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Date } from "@/components/home/Date";
@@ -7,6 +8,7 @@ import { IoSend } from "react-icons/io5";
 import { Sezione } from "@/components/home/Sezione";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
+import fetchData from "@/public/supabase/signupReqeusts/fetchData";
 
 const SignUpPage = () => {
   const [nome, setNome] = useState("");
@@ -16,6 +18,7 @@ const SignUpPage = () => {
   const [cpassword, setCPassword] = useState("");
   const [email, setEmail] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const validateEmail = (email: string) => {
     const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -24,24 +27,25 @@ const SignUpPage = () => {
 
   const validateForm = () => {
     if (!nome || !cognome || !selectedSection || !password || !cpassword || !selectedDate) {
-      alert("Tutti i campi devono essere compilati.");
+      setErrorMessage("Tutti i campi devono essere compilati.");
       return false;
     }
 
     if (!validateEmail(email)) {
-      alert("Inserisci un'email valida.");
+      setErrorMessage("Inserisci un'email valida.");
       return false;
     }
 
     if (password !== cpassword) {
-      alert("Le password non coincidono.");
+      setErrorMessage("Le password non coincidono.");
       return false;
     }
 
+    setErrorMessage(null);
     return true;
   };
 
-  const handleDataSignUp = () => {
+  const handleDataSignUp = async () => {
     if (!validateForm()) {
       return;
     }
@@ -55,11 +59,21 @@ const SignUpPage = () => {
     console.log("Sezione:", selectedSection);
     console.log("Data di nascita:", fDate);
 
-    
+    // Fetch data from supabase
+    const data = await fetchData(email);
+    if (data) {
+      setErrorMessage("Account già esistente");
+    } else {
+      
+    }
   };
 
   return (
     <div className="flex flex-col justify-center items-center text-center">
+      {errorMessage && (
+        <span className="text-red-500 mb-4">{errorMessage}</span>
+      )}
+
       <div className="form-section grid grid-cols-2 gap-2">
         <Input
           type="text"
